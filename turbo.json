@@ -5,16 +5,22 @@
       "dependsOn": ["^build"]
     },
     "dev": {
-      "dependsOn": ["lint"],
+      "dependsOn": ["lint", "^prisma:generate"],
       "cache": false,
       "persistent": true
     },
     "build": {
-      "dependsOn": ["lint"],
+      "dependsOn": ["lint", "^prisma:generate"],
       "outputs": ["dist/**", ".next/**"]
     },
     "start": {
       "dependsOn": ["build"]
+    },
+    "prisma:generate": {
+      "cache": false
+    },
+    "prisma:push": {
+      "cache": false
     }
   }
 }

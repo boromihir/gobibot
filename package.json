@@ -23,6 +23,7 @@
     "packages/tsconfig",
     "packages/eslint-config-gobibot",
     "apps/bot",
-    "apps/web"
+    "apps/web",
+    "packages/prisma-client"
   ]
 }
