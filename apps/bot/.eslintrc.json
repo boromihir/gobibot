@@ -1,0 +1,4 @@
+{
+  "extends": ["gobibot"],
+  "ignorePatterns": ["dist"]
+}

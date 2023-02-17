@@ -1,0 +1,10 @@
+{
+  "extends": "@gobibot/tsconfig/tsconfig.json",
+  "compilerOptions": {
+    "lib": ["esnext"],
+    "module": "CommonJS",
+    "outDir": "dist"
+  },
+  "include": ["src"],
+  "exclude": ["dist"]
+}
