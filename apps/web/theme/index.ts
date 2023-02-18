@@ -6,17 +6,12 @@ const inter = Inter({ subsets: ['latin'] })
 
 const theme = extendTheme({
   config: {
-    initialColorMode: 'light',
+    initialColorMode: 'dark',
     useSystemColorMode: false
   },
   fonts: {
     heading: inter.style.fontFamily,
     body: inter.style.fontFamily
-  },
-  colors: {
-    discord: {
-      500: '#5865F2'
-    }
   }
 })
 
