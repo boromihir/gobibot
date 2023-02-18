@@ -14,7 +14,7 @@ export default function Home() {
         <HStack>
           <Image
             src="/cabbage.png"
-            alt="Vercel Logo"
+            alt="GobiBot"
             width={48}
             height={48}
             priority
