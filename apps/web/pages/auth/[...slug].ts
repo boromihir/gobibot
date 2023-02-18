@@ -124,6 +124,10 @@ export const getServerSideProps: GetServerSideProps = async context => {
         notFound: true
       }
     }
+  } else {
+    return {
+      notFound: true
+    }
   }
 
   return {
