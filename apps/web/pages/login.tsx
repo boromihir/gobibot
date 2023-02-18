@@ -1,28 +1,44 @@
 import { Button, Container, Heading, VStack } from '@chakra-ui/react'
-import { FaDiscord } from 'react-icons/fa'
+import Head from 'next/head'
+import Image from 'next/image'
+import { SiDiscord } from 'react-icons/si'
 
 export default function Login() {
   const onClick = () => {
-    const w = 600
+    const w = 800
     const h = 800
-    const y = window.outerHeight / 2 - w / 2
-    const x = window.outerWidth / 2 - h / 2
+    const y = (window.outerHeight - h) / 2
+    const x = (window.outerWidth - w) / 2
     const windowFeatures = `popup,width=${w},height=${h},top=${y},left=${x}`
-    window.open('http://localhost:3000/auth/discord', '_blank', windowFeatures)
+    window.open('/auth/discord', '_blank', windowFeatures)
   }
 
   return (
-    <Container mt="10rem" centerContent>
-      <VStack spacing="2rem">
-        <Heading size="lg">Login to GobiBot</Heading>
-        <Button
-          leftIcon={<FaDiscord />}
-          onClick={onClick}
-          colorScheme="discord"
-        >
-          Continue with Discord
-        </Button>
-      </VStack>
-    </Container>
+    <>
+      <Head>
+        <title>Login - GobiBot</title>
+      </Head>
+      <Container mt="10rem" centerContent>
+        <VStack spacing="2rem">
+          <Image
+            src="/cabbage.png"
+            alt="cabbage"
+            width={48}
+            height={48}
+            priority
+          />
+          <Heading size="lg">Login to GobiBot</Heading>
+          <Button
+            leftIcon={<SiDiscord />}
+            onClick={onClick}
+            backgroundColor="#5865F2"
+            _hover={{ bg: '#4752C4' }}
+            color="#FFFFFF"
+          >
+            Continue with Discord
+          </Button>
+        </VStack>
+      </Container>
+    </>
   )
 }
