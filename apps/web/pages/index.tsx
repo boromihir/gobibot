@@ -1,6 +1,7 @@
 import Head from 'next/head'
-import { Container, Heading, HStack } from '@chakra-ui/react'
+import { Button, Container, Heading, HStack, VStack } from '@chakra-ui/react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 export default function Home() {
   return (
@@ -11,16 +12,21 @@ export default function Home() {
         <link rel="icon" href="/cabbage.ico" />
       </Head>
       <Container mt="8rem" centerContent>
-        <HStack>
-          <Image
-            src="/cabbage.png"
-            alt="GobiBot"
-            width={48}
-            height={48}
-            priority
-          />
-          <Heading size="2xl">GobiBot</Heading>
-        </HStack>
+        <VStack spacing="5rem">
+          <HStack>
+            <Image
+              src="/cabbage.png"
+              alt="cabbage"
+              width={48}
+              height={48}
+              priority
+            />
+            <Heading size="2xl">GobiBot</Heading>
+          </HStack>
+          <Link href="/login">
+            <Button colorScheme="teal">Login</Button>
+          </Link>
+        </VStack>
       </Container>
     </>
   )
