@@ -17,13 +17,13 @@ export class PingCommand extends Command {
   public async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
     await interaction.deferReply({ ephemeral: true, fetchReply: true })
 
-    return interaction.editReply({ embeds: [this.embed] })
-  }
-
-  private get embed(): EmbedBuilder {
-    return new EmbedBuilder()
-      .setColor(3_092_790)
-      .setTitle('Pong')
-      .setDescription(`Heartbeat: ${this.container.client.ws.ping} ms`)
+    return interaction.editReply({
+      embeds: [
+        new EmbedBuilder()
+          .setColor(3_092_790)
+          .setTitle('Pong')
+          .setDescription(`Heartbeat: ${this.container.client.ws.ping} ms`)
+      ]
+    })
   }
 }
