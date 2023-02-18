@@ -12,6 +12,11 @@ const theme = extendTheme({
   fonts: {
     heading: inter.style.fontFamily,
     body: inter.style.fontFamily
+  },
+  colors: {
+    discord: {
+      500: '#5865F2'
+    }
   }
 })
 
