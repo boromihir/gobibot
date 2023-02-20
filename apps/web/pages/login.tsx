@@ -20,13 +20,6 @@ export default function Login() {
       </Head>
       <Container mt="10rem" centerContent>
         <VStack spacing="2rem">
-          <Image
-            src="/cabbage.png"
-            alt="cabbage"
-            width={48}
-            height={48}
-            priority
-          />
           <Heading size="lg">Login to GobiBot</Heading>
           <Button
             leftIcon={<SiDiscord />}
