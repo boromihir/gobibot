@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "lint": "turbo run lint --cache-dir=.turbo",
-    "dev": "turbo run dev --no-cache --parallel --cache-dir=.turbo",
+    "dev": "turbo run dev --parallel --cache-dir=.turbo",
     "build": "turbo run build --cache-dir=.turbo",
     "start": "turbo run start",
     "changeset": "changeset",
