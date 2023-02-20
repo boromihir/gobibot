@@ -5,7 +5,9 @@
       "dependsOn": ["^build"]
     },
     "dev": {
-      "dependsOn": ["^prisma:generate"]
+      "dependsOn": ["^prisma:generate"],
+      "cache": false,
+      "persistent": true
     },
     "build": {
       "dependsOn": ["lint", "^prisma:generate"],
