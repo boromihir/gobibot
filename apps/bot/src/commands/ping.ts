@@ -21,8 +21,8 @@ export class PingCommand extends Command {
       embeds: [
         new EmbedBuilder()
           .setColor(3_092_790)
-          .setTitle('Pong')
-          .setDescription(`Heartbeat: ${this.container.client.ws.ping} ms`)
+          .setAuthor({ name: 'Pong' })
+          .setTitle(`Heartbeat: ${this.container.client.ws.ping} ms`)
       ]
     })
   }
