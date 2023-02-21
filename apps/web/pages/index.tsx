@@ -1,7 +1,7 @@
 import Head from 'next/head'
-import { Button, Container, Heading, HStack, VStack } from '@chakra-ui/react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Button, Container, Heading, HStack, VStack } from '@chakra-ui/react'
 
 export default function Home() {
   return (

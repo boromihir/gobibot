@@ -1,59 +1,34 @@
-import { GetServerSideProps } from 'next'
 import crypto from 'crypto'
 import nookies from 'nookies'
+import { GetServerSideProps } from 'next'
 
-import prisma from '../../prisma'
-
-interface ProviderConfig {
-  readonly id: string
-  readonly name: string
-  readonly authorization: string
-  readonly token: string
-  readonly userinfo: string
-  readonly clientId: string
-  readonly clientSecret: string
-  readonly redirectURI: string
-  readonly scope: string
-}
-
-const providers: ProviderConfig[] = [
-  {
-    id: 'discord',
-    name: 'Discord',
-    authorization: 'https://discord.com/api/oauth2/authorize',
-    token: 'https://discord.com/api/oauth2/token',
-    userinfo: 'https://discord.com/api/users/@me',
-    clientId: process.env.DISCORD_CLIENT_ID as string,
-    clientSecret: process.env.DISCORD_CLIENT_SECRET as string,
-    redirectURI: process.env.DISCORD_REDIRECT_URI as string,
-    scope: ['identify', 'email'].join(' ')
-  },
-  {
-    id: 'spotify',
-    name: 'Spotify',
-    authorization: 'https://accounts.spotify.com/authorize',
-    token: 'https://accounts.spotify.com/api/token',
-    userinfo: 'https://api.spotify.com/v1/me',
-    clientId: process.env.SPOTIFY_CLIENT_ID as string,
-    clientSecret: process.env.SPOTIFY_CLIENT_SECRET as string,
-    redirectURI: process.env.SPOTIFY_REDIRECT_URI as string,
-    scope: ['user-read-email'].join(' ')
-  }
-]
+import prisma from '@config/prisma'
+import providers from '@config/constants/providers'
 
 export const getServerSideProps: GetServerSideProps = async context => {
   const { slug, code, state } = context.query
 
+  // Check if slug is present else return 404
   if (slug) {
+    // Retrieve provider config data from slug
     const provider = providers.find(obj => obj.id === slug[0])
-    const providerCookieKey = `${provider?.id}State`
 
     if (provider) {
+      // Construct provider cookieKey from provider id
+      const providerCookieKey = `${provider.id}State`
+
+      // If URL is callback then perform oauth token retrieval
+      // else initiate oauth flow
       if (slug[1] === 'callback') {
         const cookies = nookies.get(context)
         const cookieProviderState = cookies[providerCookieKey]
 
+        // Compare state stored in cookie to state retrieved from callback URL
+        // If they match, fetch tokens from oauth provider
+        // If they don't match, it means state is not pure and return 404
+        // @TODO: return better error screen here to show invalid access was initiated
         if (cookieProviderState === state) {
+          // Fetch tokens from provider
           const tokenResponse = await fetch(provider.token, {
             method: 'post',
             headers: {
@@ -73,6 +48,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
           const tokenType = providerTokenData.token_type
           const accessToken = providerTokenData.access_token
 
+          // Fetch user data using access token received in previous step
           const userInfoResponse = await fetch(provider.userinfo, {
             headers: {
               Authorization: `${tokenType} ${accessToken}`
@@ -84,10 +60,12 @@ export const getServerSideProps: GetServerSideProps = async context => {
           console.log('tokenData', providerTokenData)
           console.log('userData', providerUserData)
 
+          // @TODO: Persist userId in cookies to make it easier to connect accounts from different providers
           const user = await prisma.user.create({ data: {} })
 
           nookies.set(context, 'gobibotUserId', user.id)
 
+          // Persist token data and user data to database
           await prisma.account.create({
             data: {
               email: providerUserData.email,
@@ -115,14 +93,17 @@ export const getServerSideProps: GetServerSideProps = async context => {
           }
         }
       } else {
+        // Generate state value
         const providerState = crypto.randomUUID()
 
+        // Store state in httpOnly cookie
         nookies.set(context, providerCookieKey, providerState, {
           httpOnly: true,
           maxAge: 60,
           secure: process.env.NODE_ENV === 'production'
         })
 
+        // Construct OAuth URL
         const destinationURL = new URL(provider.authorization)
         destinationURL.searchParams.set('response_type', 'code')
         destinationURL.searchParams.set('state', providerState)
@@ -136,6 +117,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
           provider?.redirectURI as string
         )
 
+        // Initial OAauth flow
         return {
           redirect: {
             permanent: false,

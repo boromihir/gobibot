@@ -1,5 +1,5 @@
-import { Button, Container, Heading, VStack } from '@chakra-ui/react'
 import Head from 'next/head'
+import { Button, Container, Heading, VStack } from '@chakra-ui/react'
 import { SiDiscord } from 'react-icons/si'
 
 export default function Login() {
