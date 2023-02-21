@@ -4,6 +4,7 @@
   "description": "Gobibot Monorepo",
   "private": true,
   "scripts": {
+    "turbo": "turbo",
     "lint": "turbo run lint --cache-dir=.turbo",
     "dev": "turbo run dev --no-cache --parallel --cache-dir=.turbo",
     "build": "turbo run build --cache-dir=.turbo",
