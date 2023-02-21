@@ -129,12 +129,14 @@ export const getServerSideProps: GetServerSideProps = async context => {
       notFound: true
     }
   }
-
-  return {
-    props: {}
-  }
 }
 
 export default function AuthHandler() {
-  return `AuthHandler`
+  if (typeof window !== 'undefined') {
+    if (window.opener && window.opener !== window && !window.menubar.visible) {
+      window.close()
+    }
+  }
+
+  return null
 }
