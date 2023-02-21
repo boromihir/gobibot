@@ -2,6 +2,8 @@ import { GetServerSideProps } from 'next'
 import crypto from 'crypto'
 import nookies from 'nookies'
 
+import prisma from '../../prisma'
+
 interface ProviderConfig {
   readonly id: string
   readonly name: string
@@ -66,10 +68,10 @@ export const getServerSideProps: GetServerSideProps = async context => {
             })
           })
 
-          const tokenData = await tokenResponse.json()
+          const providerTokenData = await tokenResponse.json()
 
-          const tokenType = tokenData.token_type
-          const accessToken = tokenData.access_token
+          const tokenType = providerTokenData.token_type
+          const accessToken = providerTokenData.access_token
 
           const userInfoResponse = await fetch(provider.userinfo, {
             headers: {
@@ -77,10 +79,32 @@ export const getServerSideProps: GetServerSideProps = async context => {
             }
           })
 
-          const userData = await userInfoResponse.json()
+          const providerUserData = await userInfoResponse.json()
 
-          console.log('tokenData', tokenData)
-          console.log('userData', userData)
+          console.log('tokenData', providerTokenData)
+          console.log('userData', providerUserData)
+
+          const user = await prisma.user.create({ data: {} })
+
+          nookies.set(context, 'gobibotUserId', user.id)
+
+          await prisma.account.create({
+            data: {
+              email: providerUserData.email,
+              provider: provider.id,
+              providerAccountId: providerUserData.id,
+              user: {
+                connect: {
+                  id: user.id
+                }
+              },
+              accessToken: providerTokenData.access_token,
+              refreshToken: providerTokenData.refresh_token,
+              tokenType: providerTokenData.token_type,
+              expiresAt: providerTokenData.expires_in,
+              scope: providerTokenData.scope
+            }
+          })
 
           return {
             props: {}
