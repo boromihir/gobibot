@@ -60,7 +60,11 @@ export const getServerSideProps: GetServerSideProps = async context => {
           console.log('tokenData', providerTokenData)
           console.log('userData', providerUserData)
 
-          // @TODO: Persist userId in cookies to make it easier to connect accounts from different providers
+          // @TODO: check database for existing accounts
+          // if account exists read entry
+          // if account does not exist, create entry
+          // set cookie
+
           const user = await prisma.user.create({ data: {} })
 
           nookies.set(context, 'userId', user.id, {
