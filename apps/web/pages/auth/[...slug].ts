@@ -63,7 +63,13 @@ export const getServerSideProps: GetServerSideProps = async context => {
           // @TODO: Persist userId in cookies to make it easier to connect accounts from different providers
           const user = await prisma.user.create({ data: {} })
 
-          nookies.set(context, 'gobibotUserId', user.id)
+          nookies.set(context, 'userId', user.id, {
+            httpOnly: true,
+            maxAge: 604800, // 1 week in seconds
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            path: '/'
+          })
 
           // Persist token data and user data to database
           await prisma.account.create({
@@ -85,7 +91,10 @@ export const getServerSideProps: GetServerSideProps = async context => {
           })
 
           return {
-            props: {}
+            redirect: {
+              destination: '/account',
+              permanent: false
+            }
           }
         } else {
           return {
@@ -100,7 +109,9 @@ export const getServerSideProps: GetServerSideProps = async context => {
         nookies.set(context, providerCookieKey, providerState, {
           httpOnly: true,
           maxAge: 60,
-          secure: process.env.NODE_ENV === 'production'
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/'
         })
 
         // Construct OAuth URL
@@ -138,11 +149,5 @@ export const getServerSideProps: GetServerSideProps = async context => {
 }
 
 export default function AuthHandler() {
-  if (typeof window !== 'undefined') {
-    if (window.opener && window.opener !== window && !window.menubar.visible) {
-      window.close()
-    }
-  }
-
   return null
 }
