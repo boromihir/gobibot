@@ -17,16 +17,50 @@ export const getServerSideProps: GetServerSideProps = async context => {
       // Construct provider cookieKey from provider id
       const providerCookieKey = `${provider.id}State`
 
-      // If URL is callback then perform oauth token retrieval
-      // else initiate oauth flow
-      if (slug[1] === 'callback') {
+      // If slug is of length 1 then initiate oauth flow
+      // else if slug[1] === 'callback' perform oauth token retrieval
+      // else return 404
+      if (slug.length === 1) {
+        // Generate state value
+        const providerState = crypto.randomUUID()
+
+        // // Set httpOnly cookie containing generated state value
+        nookies.set(context, providerCookieKey, providerState, {
+          httpOnly: true,
+          maxAge: 60,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/'
+        })
+
+        // Construct OAuth URL
+        const destinationURL = new URL(provider.authorization)
+        destinationURL.searchParams.set('response_type', 'code')
+        destinationURL.searchParams.set('state', providerState)
+        destinationURL.searchParams.set(
+          'client_id',
+          provider?.clientId as string
+        )
+        destinationURL.searchParams.set('scope', provider.scope)
+        destinationURL.searchParams.set(
+          'redirect_uri',
+          provider?.redirectURI as string
+        )
+
+        // Initial OAauth flow
+        return {
+          redirect: {
+            permanent: false,
+            destination: destinationURL.href
+          }
+        }
+      } else if (slug.length === 2 && slug[1] === 'callback') {
         const cookies = nookies.get(context)
         const cookieProviderState = cookies[providerCookieKey]
 
         // Compare state stored in cookie to state retrieved from callback URL
         // If they match, fetch tokens from oauth provider
-        // If they don't match, it means state is not pure and return 404
-        // @TODO: return better error screen here to show invalid access was initiated
+        // If they don't match, return 404
         if (cookieProviderState === state) {
           // Fetch tokens from provider
           const tokenResponse = await fetch(provider.token, {
@@ -65,33 +99,47 @@ export const getServerSideProps: GetServerSideProps = async context => {
           // if account does not exist, create entry
           // set cookie
 
-          const user = await prisma.user.create({ data: {} })
+          const account = await prisma.account.findFirst({
+            where: {
+              providerAccountId: providerUserData.id
+            },
+            select: {
+              userId: true
+            }
+          })
 
-          nookies.set(context, 'userId', user.id, {
+          // If account exists get userId from account
+          // else create account and get userId
+          let userId = ''
+
+          if (account && account.userId) {
+            userId = account.userId
+          } else {
+            const newUser = await prisma.user.create({ data: {} })
+            const newAccount = await prisma.account.create({
+              data: {
+                email: providerUserData.email,
+                provider: provider.id,
+                providerAccountId: providerUserData.id,
+                accessToken: providerTokenData.access_token,
+                refreshToken: providerTokenData.refresh_token,
+                tokenType: providerTokenData.token_type,
+                expiresAt: providerTokenData.expires_in,
+                scope: providerTokenData.scope,
+                user: { connect: { id: newUser.id } }
+              }
+            })
+
+            userId = newAccount.userId
+          }
+
+          // Set httpOnly cookie containing userId
+          nookies.set(context, 'userId', userId, {
             httpOnly: true,
             maxAge: 604800, // 1 week in seconds
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
             path: '/'
-          })
-
-          // Persist token data and user data to database
-          await prisma.account.create({
-            data: {
-              email: providerUserData.email,
-              provider: provider.id,
-              providerAccountId: providerUserData.id,
-              user: {
-                connect: {
-                  id: user.id
-                }
-              },
-              accessToken: providerTokenData.access_token,
-              refreshToken: providerTokenData.refresh_token,
-              tokenType: providerTokenData.token_type,
-              expiresAt: providerTokenData.expires_in,
-              scope: providerTokenData.scope
-            }
           })
 
           return {
@@ -106,38 +154,8 @@ export const getServerSideProps: GetServerSideProps = async context => {
           }
         }
       } else {
-        // Generate state value
-        const providerState = crypto.randomUUID()
-
-        // Store state in httpOnly cookie
-        nookies.set(context, providerCookieKey, providerState, {
-          httpOnly: true,
-          maxAge: 60,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          path: '/'
-        })
-
-        // Construct OAuth URL
-        const destinationURL = new URL(provider.authorization)
-        destinationURL.searchParams.set('response_type', 'code')
-        destinationURL.searchParams.set('state', providerState)
-        destinationURL.searchParams.set(
-          'client_id',
-          provider?.clientId as string
-        )
-        destinationURL.searchParams.set('scope', provider.scope)
-        destinationURL.searchParams.set(
-          'redirect_uri',
-          provider?.redirectURI as string
-        )
-
-        // Initial OAauth flow
         return {
-          redirect: {
-            permanent: false,
-            destination: destinationURL.href
-          }
+          notFound: true
         }
       }
     } else {
