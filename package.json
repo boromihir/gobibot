@@ -11,7 +11,8 @@
     "start": "turbo run start",
     "changeset": "changeset",
     "version": "changeset version",
-    "prettier": "prettier --write ."
+    "prettier": "prettier --write .",
+    "prisma:generate": "npm run prisma:generate --workspace=packages/prisma-client"
   },
   "dependencies": {
     "@changesets/cli": "^2.26.0"
